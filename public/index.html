@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>紫微斗數命盤排盤</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Helvetica Neue', Arial, 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+      background: #0f0c29;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      min-height: 100vh;
+      color: #e8e0f0;
+      padding: 24px 16px;
+    }
+
+    .container { max-width: 960px; margin: 0 auto; }
+
+    header { text-align: center; margin-bottom: 36px; }
+    header h1 { font-size: 2rem; letter-spacing: 4px; color: #d4af37; text-shadow: 0 0 20px rgba(212,175,55,0.4); }
+    header p { color: #a89cc8; margin-top: 8px; font-size: 0.9rem; letter-spacing: 2px; }
+
+    .card {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(212,175,55,0.2);
+      border-radius: 16px; padding: 32px;
+      backdrop-filter: blur(10px); margin-bottom: 24px;
+    }
+
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
+
+    .form-group { display: flex; flex-direction: column; gap: 8px; }
+    .form-group label { font-size: 0.85rem; color: #d4af37; letter-spacing: 1px; }
+
+    input, select {
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 8px; padding: 12px 16px; color: #e8e0f0;
+      font-size: 1rem; outline: none; transition: border-color 0.2s;
+    }
+    input:focus, select:focus { border-color: #d4af37; }
+    select option { background: #302b63; }
+
+    .btn-row { display: flex; gap: 12px; margin-top: 24px; }
+    .btn {
+      flex: 1; padding: 14px;
+      background: linear-gradient(135deg, #d4af37, #f0c040);
+      color: #1a1535; border: none; border-radius: 10px;
+      font-size: 1.05rem; font-weight: bold; letter-spacing: 2px;
+      cursor: pointer; transition: opacity 0.2s, transform 0.1s;
+    }
+    .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+    .btn-pdf {
+      flex: 0 0 auto; padding: 14px 20px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(212,175,55,0.4);
+      color: #d4af37; border-radius: 10px;
+      font-size: 0.9rem; font-weight: bold; letter-spacing: 1px;
+      cursor: pointer; transition: all 0.2s; white-space: nowrap;
+    }
+    .btn-pdf:hover { background: rgba(212,175,55,0.15); }
+    .btn-pdf { display: none; }
+    .btn-pdf.visible { display: block; }
+
+    .result { display: none; }
+
+    .result-header {
+      text-align: center; padding: 24px;
+      background: rgba(212,175,55,0.08); border-radius: 12px;
+      margin-bottom: 24px; border: 1px solid rgba(212,175,55,0.3);
+    }
+    .result-header .person-name { font-size: 1.6rem; color: #d4af37; letter-spacing: 4px; }
+    .result-header .meta { font-size: 0.85rem; color: #a89cc8; margin-top: 8px; line-height: 1.8; }
+
+    .highlight-box {
+      background: linear-gradient(135deg, rgba(212,175,55,0.15), rgba(212,175,55,0.05));
+      border: 1px solid rgba(212,175,55,0.4); border-radius: 12px;
+      padding: 20px 24px; margin-bottom: 24px; text-align: center;
+    }
+    .highlight-box .label { font-size: 0.8rem; color: #a89cc8; letter-spacing: 2px; margin-bottom: 6px; }
+    .highlight-box .value { font-size: 1.5rem; color: #f0c040; font-weight: bold; letter-spacing: 4px; }
+    .highlight-box .sub { font-size: 0.85rem; color: #c8b8e8; margin-top: 6px; }
+
+    .info-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
+    @media (max-width: 600px) { .info-grid { grid-template-columns: 1fr 1fr; } }
+    .info-item {
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px; padding: 14px; text-align: center;
+    }
+    .info-item .info-label { font-size: 0.75rem; color: #a89cc8; margin-bottom: 4px; }
+    .info-item .info-value { font-size: 1rem; color: #e8e0f0; font-weight: 500; }
+
+    .section-title {
+      font-size: 0.9rem; color: #d4af37; letter-spacing: 3px;
+      margin-bottom: 16px; padding-bottom: 8px;
+      border-bottom: 1px solid rgba(212,175,55,0.2);
+    }
+
+    /* 個性解析 */
+    .personality-card {
+      background: rgba(138,111,200,0.1); border: 1px solid rgba(138,111,200,0.35);
+      border-radius: 14px; padding: 24px; margin-bottom: 24px;
+    }
+    .personality-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+    .personality-title { font-size: 1.2rem; color: #c8a8ff; font-weight: bold; letter-spacing: 2px; }
+    .tag {
+      font-size: 0.72rem; padding: 3px 10px; border-radius: 20px;
+      background: rgba(138,111,200,0.25); border: 1px solid rgba(138,111,200,0.5); color: #c8a8ff;
+    }
+    .personality-summary { font-size: 0.9rem; color: #d8d0f0; line-height: 1.9; margin-bottom: 16px; white-space: pre-line; }
+    .personality-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 560px) { .personality-grid { grid-template-columns: 1fr; } }
+    .personality-item { background: rgba(255,255,255,0.04); border-radius: 10px; padding: 12px 14px; }
+    .personality-item .pi-label { font-size: 0.72rem; color: #a89cc8; margin-bottom: 4px; letter-spacing: 1px; }
+    .personality-item .pi-value { font-size: 0.85rem; color: #e0d8f8; line-height: 1.6; }
+
+    /* 大限 */
+    .decadal-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 8px; }
+    .decadal-item {
+      display: grid; grid-template-columns: 95px 85px 1fr auto;
+      align-items: center; gap: 12px;
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px; padding: 12px 16px; transition: border-color 0.2s;
+    }
+    @media (max-width: 600px) { .decadal-item { grid-template-columns: 80px 70px 1fr; } .decadal-stars { display: none; } }
+    .decadal-item.current { border-color: #d4af37; background: rgba(212,175,55,0.1); }
+    .decadal-range { font-size: 0.85rem; color: #a89cc8; }
+    .decadal-range strong { color: #e8e0f0; font-size: 0.95rem; }
+    .decadal-ganzhi { font-size: 1rem; color: #e8e0f0; font-weight: 500; }
+    .decadal-palace { font-size: 0.85rem; color: #c8b8e8; }
+    .decadal-stars { font-size: 0.8rem; color: #8898c8; text-align: right; }
+    .current-badge {
+      display: inline-block; font-size: 0.65rem; padding: 2px 7px;
+      background: #d4af37; color: #1a1535; border-radius: 4px;
+      font-weight: bold; margin-left: 6px; vertical-align: middle;
+    }
+
+    /* 流年分析 */
+    .yearly-overview {
+      background: rgba(80,160,220,0.08); border: 1px solid rgba(80,160,220,0.3);
+      border-radius: 14px; padding: 20px 24px; margin-bottom: 20px;
+    }
+    .yearly-overview-top { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; margin-bottom: 14px; }
+    .yearly-ganzhi { font-size: 1.4rem; color: #80c8f8; font-weight: bold; letter-spacing: 3px; }
+    .yearly-palace { font-size: 0.9rem; color: #a8d8f8; }
+    .yearly-mutagen { display: flex; gap: 8px; flex-wrap: wrap; }
+    .mutagen-pill {
+      font-size: 0.75rem; padding: 3px 10px; border-radius: 12px; font-weight: 500;
+    }
+    .mp-lu { background: rgba(80,200,80,0.2); border: 1px solid rgba(80,200,80,0.5); color: #80e880; }
+    .mp-quan { background: rgba(80,120,220,0.2); border: 1px solid rgba(80,120,220,0.5); color: #80a8f8; }
+    .mp-ke { background: rgba(220,200,80,0.2); border: 1px solid rgba(220,200,80,0.5); color: #f0e060; }
+    .mp-ji { background: rgba(220,80,80,0.2); border: 1px solid rgba(220,80,80,0.5); color: #f08080; }
+    .yearly-advice { font-size: 0.88rem; color: #c8e4f8; line-height: 1.8; }
+
+    /* 月份表格 */
+    .monthly-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 8px;
+    }
+    @media (max-width: 600px) { .monthly-grid { grid-template-columns: repeat(2, 1fr); } }
+    .monthly-card {
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px; padding: 12px 14px;
+    }
+    .monthly-card.good { border-color: rgba(80,200,80,0.4); background: rgba(80,200,80,0.06); }
+    .monthly-card.alert { border-color: rgba(220,160,60,0.4); background: rgba(220,160,60,0.06); }
+    .monthly-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .monthly-num { font-size: 0.75rem; color: #a89cc8; }
+    .monthly-ganzhi { font-size: 0.95rem; color: #e8e0f0; font-weight: 500; }
+    .monthly-palace { font-size: 0.8rem; color: #80c8f8; margin-bottom: 6px; font-weight: 500; }
+    .monthly-theme { font-size: 0.72rem; color: #a89cc8; margin-bottom: 6px; }
+    .monthly-mutagen-row { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 6px; }
+    .m-pill { font-size: 0.65rem; padding: 1px 6px; border-radius: 8px; }
+    .monthly-advice { font-size: 0.72rem; color: #b8c8d8; line-height: 1.6; }
+
+    /* 宮位總覽 */
+    .palaces-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    @media (max-width: 600px) { .palaces-grid { grid-template-columns: repeat(2, 1fr); } }
+    .palace-card {
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px; padding: 12px; transition: border-color 0.2s; cursor: default;
+    }
+    .palace-card:hover { border-color: rgba(212,175,55,0.4); }
+    .palace-card.is-ming { border-color: #d4af37; background: rgba(212,175,55,0.1); }
+    .palace-card.is-body { border-color: #8a6fc8; background: rgba(138,111,200,0.1); }
+    .palace-card .palace-name { font-size: 0.75rem; color: #a89cc8; margin-bottom: 4px; display: flex; align-items: center; gap: 4px; }
+    .palace-card .palace-ganzhi { font-size: 1rem; color: #e8e0f0; font-weight: 500; margin-bottom: 6px; }
+    .palace-card .stars { font-size: 0.78rem; color: #c8d8f0; line-height: 1.6; min-height: 20px; }
+    .palace-card .minor-stars { font-size: 0.7rem; color: #8898b0; margin-top: 4px; }
+
+    .badge { font-size: 0.62rem; padding: 1px 5px; border-radius: 4px; font-weight: bold; }
+    .badge-ming { background: #d4af37; color: #1a1535; }
+    .badge-body { background: #8a6fc8; color: white; }
+    .mutagen { font-size: 0.7rem; padding: 1px 4px; border-radius: 3px; margin-left: 2px; vertical-align: middle; }
+    .mutagen-祿 { background: rgba(80,200,80,0.3); color: #80e880; }
+    .mutagen-權 { background: rgba(80,120,200,0.3); color: #80a0f0; }
+    .mutagen-科 { background: rgba(200,200,80,0.3); color: #f0e880; }
+    .mutagen-忌 { background: rgba(200,80,80,0.3); color: #f08080; }
+
+    .error-msg { color: #f08080; text-align: center; padding: 16px; }
+    .loading { text-align: center; color: #d4af37; padding: 16px; letter-spacing: 2px; }
+    .divider { border: none; border-top: 1px solid rgba(212,175,55,0.15); margin: 24px 0; }
+
+    /* PDF 列印樣式 */
+    @media print {
+      body { background: #fff !important; color: #111 !important; padding: 0; }
+      .card { background: #fff !important; border: 1px solid #ccc !important; box-shadow: none !important; }
+      .btn-row, header p { display: none !important; }
+      header h1 { color: #333 !important; text-shadow: none !important; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>紫微斗數命盤</h1>
+    <p>輸入出生資料，即刻排出您的紫微命盤</p>
+  </header>
+
+  <div class="card">
+    <div class="form-grid">
+      <div class="form-group">
+        <label>姓名</label>
+        <input type="text" id="name" placeholder="請輸入姓名" />
+      </div>
+      <div class="form-group">
+        <label>性別</label>
+        <select id="gender">
+          <option value="male">男</option>
+          <option value="female">女</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>出生日期（西曆）</label>
+        <input type="date" id="solarDate" />
+      </div>
+      <div class="form-group">
+        <label>出生時辰</label>
+        <select id="timeKey">
+          <option value="子時">子時（23:00–01:00）</option>
+          <option value="丑時">丑時（01:00–03:00）</option>
+          <option value="寅時">寅時（03:00–05:00）</option>
+          <option value="卯時">卯時（05:00–07:00）</option>
+          <option value="辰時">辰時（07:00–09:00）</option>
+          <option value="巳時">巳時（09:00–11:00）</option>
+          <option value="午時">午時（11:00–13:00）</option>
+          <option value="未時">未時（13:00–15:00）</option>
+          <option value="申時">申時（15:00–17:00）</option>
+          <option value="酉時">酉時（17:00–19:00）</option>
+          <option value="戌時">戌時（19:00–21:00）</option>
+          <option value="亥時">亥時（21:00–23:00）</option>
+        </select>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn" onclick="calculate()">排　命　盤</button>
+      <button class="btn-pdf" id="btnPdf" onclick="exportPDF()">下載 PDF</button>
+    </div>
+  </div>
+
+  <div id="result" class="result">
+    <div class="card" id="reportContent">
+      <div id="result-content"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+async function calculate() {
+  const name = document.getElementById('name').value.trim();
+  const gender = document.getElementById('gender').value;
+  const solarDate = document.getElementById('solarDate').value;
+  const timeKey = document.getElementById('timeKey').value;
+  if (!name || !solarDate) { alert('請填寫姓名與出生日期'); return; }
+
+  const resultDiv = document.getElementById('result');
+  const contentDiv = document.getElementById('result-content');
+  resultDiv.style.display = 'block';
+  contentDiv.innerHTML = '<div class="loading">排盤中⋯⋯</div>';
+  resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  try {
+    const res = await fetch('/api/chart', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, gender, solarDate, timeKey }),
+    });
+    const data = await res.json();
+    if (data.error) { contentDiv.innerHTML = `<div class="error-msg">${data.error}</div>`; return; }
+    renderResult(data, contentDiv);
+    document.getElementById('btnPdf').classList.add('visible');
+    window._chartData = data;
+  } catch (e) {
+    contentDiv.innerHTML = '<div class="error-msg">連線失敗，請稍後再試</div>';
+  }
+}
+
+function exportPDF() {
+  const data = window._chartData;
+  if (!data) return;
+  const element = document.getElementById('reportContent');
+  const opt = {
+    margin: [10, 10],
+    filename: `紫微命盤_${data.name}_${data.solarDate}.pdf`,
+    image: { type: 'jpeg', quality: 0.95 },
+    html2canvas: { scale: 2, useCORS: true, backgroundColor: '#1a1535' },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] },
+  };
+  const btn = document.getElementById('btnPdf');
+  btn.textContent = '產生中…';
+  btn.disabled = true;
+  html2pdf().set(opt).from(element).save().then(() => {
+    btn.textContent = '下載 PDF';
+    btn.disabled = false;
+  });
+}
+
+function mTag(m) {
+  if (!m) return '';
+  return `<span class="mutagen mutagen-${m}">${m}</span>`;
+}
+function starsHtml(stars) {
+  return stars.map(s => `${s.name}${mTag(s.mutagen)}`).join('　');
+}
+function mPill(label, cls, star) {
+  return `<span class="m-pill ${cls}">${label}：${star}</span>`;
+}
+
+function renderPersonality(p) {
+  if (!p) return '';
+  const tags = (p.tags || []).map(t => `<span class="tag">${t}</span>`).join(' ');
+  return `
+    <div class="personality-card">
+      <div class="personality-header">
+        <span class="personality-title">${p.title}</span>${tags}
+      </div>
+      <div class="personality-summary">${p.summary}</div>
+      <div class="personality-grid">
+        <div class="personality-item"><div class="pi-label">✦ 優勢特質</div><div class="pi-value">${p.strength}</div></div>
+        <div class="personality-item"><div class="pi-label">△ 需注意</div><div class="pi-value">${p.weakness}</div></div>
+        <div class="personality-item"><div class="pi-label">◎ 適合事業</div><div class="pi-value">${p.career}</div></div>
+        <div class="personality-item"><div class="pi-label">♡ 感情特質</div><div class="pi-value">${p.relationship}</div></div>
+      </div>
+    </div>`;
+}
+
+function renderDecadal(list) {
+  return `<div class="decadal-list">${list.map(d => {
+    const starStr = d.majorStars.map(s => s.name + mTag(s.mutagen)).join('　') || '—';
+    const cur = d.isCurrent ? '<span class="current-badge">當前</span>' : '';
+    return `<div class="decadal-item ${d.isCurrent ? 'current' : ''}">
+      <div class="decadal-range">${cur}<br><strong>${d.range[0]}–${d.range[1]} 歲</strong></div>
+      <div class="decadal-ganzhi">${d.heavenlyStem}${d.decadalBranch}宮</div>
+      <div class="decadal-palace">${d.palaceName}</div>
+      <div class="decadal-stars">${starStr}</div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function renderYearly(ya) {
+  const [lu, quan, ke, ji] = ya.mutagen;
+  const overview = `
+    <div class="yearly-overview">
+      <div class="yearly-overview-top">
+        <span class="yearly-ganzhi">${ya.ganzhi}</span>
+        <span class="yearly-palace">流年命宮：${ya.mingPalace}</span>
+        <div class="yearly-mutagen">
+          <span class="mutagen-pill mp-lu">化祿 ${lu}</span>
+          <span class="mutagen-pill mp-quan">化權 ${quan}</span>
+          <span class="mutagen-pill mp-ke">化科 ${ke}</span>
+          <span class="mutagen-pill mp-ji">化忌 ${ji}</span>
+        </div>
+      </div>
+      <div class="yearly-advice">
+        流年命宮落在<strong>${ya.mingPalace}</strong>，
+        全年重心集中於「${ya.theme}」相關事務。${ya.advice}
+        <br>四化提示：<strong>${lu}</strong>化祿帶來機緣、<strong>${quan}</strong>化權強化行動力、<strong>${ke}</strong>化科利於名聲學習、<strong>${ji}</strong>化忌為今年最需留意之星。
+      </div>
+    </div>`;
+
+  const months = ya.monthlyAnalysis.map(m => {
+    const [mlu, mquan, mke, mji] = m.mutagen;
+    return `
+      <div class="monthly-card ${m.score}">
+        <div class="monthly-top">
+          <span class="monthly-num">${m.month} 月</span>
+          <span class="monthly-ganzhi">${m.heavenlyStem}${m.earthlyBranch}</span>
+        </div>
+        <div class="monthly-palace">${m.flowPalace}</div>
+        <div class="monthly-theme">${m.theme}</div>
+        <div class="monthly-mutagen-row">
+          ${mPill('祿', 'm-pill mp-lu', mlu)}
+          ${mPill('忌', 'm-pill mp-ji', mji)}
+        </div>
+        <div class="monthly-advice">${m.advice}</div>
+      </div>`;
+  }).join('');
+
+  return overview + `<div class="monthly-grid">${months}</div>`;
+}
+
+function renderResult(data, container) {
+  const palacesHtml = data.palaces.map(p => {
+    const badges = [];
+    if (p.isMingGong) badges.push('<span class="badge badge-ming">命</span>');
+    if (p.isBodyPalace) badges.push('<span class="badge badge-body">身</span>');
+    return `<div class="palace-card ${p.isMingGong ? 'is-ming' : ''} ${p.isBodyPalace ? 'is-body' : ''}">
+      <div class="palace-name">${p.name}${badges.join('')}</div>
+      <div class="palace-ganzhi">${p.heavenlyStem}${p.earthlyBranch}</div>
+      <div class="stars">${p.majorStars.length ? starsHtml(p.majorStars) : '&nbsp;'}</div>
+      ${p.minorStars.length ? `<div class="minor-stars">${p.minorStars.join(' ')}</div>` : ''}
+    </div>`;
+  }).join('');
+
+  container.innerHTML = `
+    <div class="result-header">
+      <div class="person-name">${data.name}</div>
+      <div class="meta">${data.gender}命｜${data.solarDate}（${data.timeKey}）<br>${data.lunarDate}｜生肖：${data.zodiac}</div>
+    </div>
+
+    <div class="highlight-box">
+      <div class="label">命　宮</div>
+      <div class="value">${data.mingGong.heavenlyStem}${data.mingGong.earthlyBranch}宮</div>
+      <div class="sub">五行局：${data.fiveElementsClass}　｜　生年干支：${data.yearlyBranch}${data.mingGong.majorStars.length ? `　｜　命宮主星：${data.mingGong.majorStars.join('　')}` : ''}</div>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-item"><div class="info-label">身宮</div><div class="info-value">${data.bodyPalace || '—'}</div></div>
+      <div class="info-item"><div class="info-label">五行局</div><div class="info-value">${data.fiveElementsClass}</div></div>
+      <div class="info-item"><div class="info-label">生年干支</div><div class="info-value">${data.yearlyBranch}</div></div>
+    </div>
+
+    <hr class="divider">
+    <div class="section-title">命宮主星個性解析</div>
+    ${renderPersonality(data.personality)}
+
+    <hr class="divider">
+    <div class="section-title">大限排盤（每十年一宮）</div>
+    ${renderDecadal(data.decadalList)}
+
+    <hr class="divider">
+    <div class="section-title">2026 年流年運勢分析</div>
+    ${renderYearly(data.yearlyAnalysis)}
+
+    <hr class="divider">
+    <div class="section-title">十二宮位總覽</div>
+    <div class="palaces-grid">${palacesHtml}</div>`;
+}
+</script>
+</body>
+</html>
