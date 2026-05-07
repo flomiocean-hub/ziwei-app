@@ -298,6 +298,7 @@ app.post('/api/chart', (req, res) => {
   }
 });
 
-app.listen(3001, () => {
-  console.log('紫微斗數排盤伺服器已啟動：http://localhost:3001');
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+  console.log(`紫微斗數排盤伺服器已啟動：http://localhost:${PORT}`);
 });
