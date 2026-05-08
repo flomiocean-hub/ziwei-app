@@ -298,6 +298,203 @@ app.post('/api/chart', (req, res) => {
   }
 });
 
+// ==================== 八字模組 ====================
+
+const STEMS = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+const BRANCHES = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+const STEM_ELEM = {'甲':'木','乙':'木','丙':'火','丁':'火','戊':'土','己':'土','庚':'金','辛':'金','壬':'水','癸':'水'};
+const STEM_YY = {'甲':'陽','乙':'陰','丙':'陽','丁':'陰','戊':'陽','己':'陰','庚':'陽','辛':'陰','壬':'陽','癸':'陰'};
+const BRANCH_ELEM = {'子':'水','丑':'土','寅':'木','卯':'木','辰':'土','巳':'火','午':'火','未':'土','申':'金','酉':'金','戌':'土','亥':'水'};
+const GEN = {'木':'火','火':'土','土':'金','金':'水','水':'木'};
+const CON = {'木':'土','土':'水','水':'火','火':'金','金':'木'};
+const SIXTY = Array.from({length:60}, (_,i) => STEMS[i%10] + BRANCHES[i%12]);
+
+const ELEM_COLOR = {'木':'#6db86d','火':'#e07060','土':'#c8a84e','金':'#b8c8e8','水':'#6090d0'};
+
+function getTenGod(dm, ts) {
+  const de = STEM_ELEM[dm], te = STEM_ELEM[ts];
+  const sy = STEM_YY[dm] === STEM_YY[ts];
+  if (de === te) return sy ? '比肩' : '劫財';
+  if (GEN[de] === te) return sy ? '食神' : '傷官';
+  if (GEN[te] === de) return sy ? '偏印' : '正印';
+  if (CON[de] === te) return sy ? '偏財' : '正財';
+  if (CON[te] === de) return sy ? '七殺' : '正官';
+  return '—';
+}
+
+const DAY_MASTER_PERSONALITY = {
+  '甲': { element:'木', yinYang:'陽', symbol:'參天大樹', tags:['剛直正義','積極進取','理想主義'],
+    summary:'甲木為陽木，如參天大樹，個性剛直正義，有強烈的上進心與目標感。天生具有領袖氣質，不喜受拘束，喜歡開創新局。意志力堅強，但有時固執己見，不易妥協。',
+    strength:'意志堅定、執行力強、有理想抱負、正直坦率', weakness:'固執、不善變通、有時自以為是',
+    career:'適合管理、法律、建築、教育、創業', relationship:'感情專一直接，但偶爾過於剛硬，需學習柔軟' },
+  '乙': { element:'木', yinYang:'陰', symbol:'藤蔓花草', tags:['柔韌適應','溫和細膩','善於處世'],
+    summary:'乙木為陰木，如藤蔓花草，柔韌而有生命力。個性溫和細膩，善於適應環境，有藝術感與美感。處世靈活，善於借助他人之力，但有時缺乏主見。',
+    strength:'適應力強、溫柔體貼、藝術天賦、人際關係好', weakness:'優柔寡斷、過於依賴他人、缺乏主見',
+    career:'適合藝術、設計、教育、服務業', relationship:'感情細膩溫柔，善於付出，需注意不要失去自我' },
+  '丙': { element:'火', yinYang:'陽', symbol:'太陽之火', tags:['熱情開朗','慷慨大方','社交達人'],
+    summary:'丙火為陽火，如太陽般耀眼，個性熱情開朗、積極外向，天生的社交達人。充滿活力與創造力，喜歡展現自我，對他人慷慨。但有時過於衝動，需學習沉著。',
+    strength:'熱情積極、號召力強、創造力旺盛、慷慨大方', weakness:'衝動、過於外向消耗能量、注意力分散',
+    career:'適合公關、業務、演藝、政治、創意產業', relationship:'感情熱烈奔放，有魅力，需注意持久性' },
+  '丁': { element:'火', yinYang:'陰', symbol:'燈燭之火', tags:['細膩溫暖','有藝術感','持久沉穩'],
+    summary:'丁火為陰火，如燈燭溫暖而持久，個性細膩溫暖，有藝術與靈性氣質。思維深邃，重視情感交流，有強烈的內在世界。處事沉穩，但有時過於敏感。',
+    strength:'細膩體貼、藝術天賦、思慮深刻、情感豐富', weakness:'過於敏感、情緒波動、容易鑽牛角尖',
+    career:'適合藝術、文學、心理諮商、教育', relationship:'感情深情專一，注重心靈交流' },
+  '戊': { element:'土', yinYang:'陽', symbol:'廣闊大地', tags:['穩重踏實','包容力強','務實可靠'],
+    summary:'戊土為陽土，如廣闊大地，包容萬物。個性穩重踏實，責任感強，有強大的包容力。處事可靠，重視信用與承諾。但有時過於保守，思想較為傳統。',
+    strength:'可靠踏實、包容力強、責任心重、意志堅定', weakness:'思想保守、行動遲緩、過於固執傳統',
+    career:'適合地產、金融、農業、管理、工程', relationship:'感情穩重忠誠，是可靠的伴侶，但需增加浪漫感' },
+  '己': { element:'土', yinYang:'陰', symbol:'田園沃土', tags:['細緻踏實','親和力強','謹慎細心'],
+    summary:'己土為陰土，如田園沃土，滋養萬物。個性細緻親和，做事謹慎細心，善於照顧他人。有服務精神，重視細節，但有時過於謹小慎微，缺乏魄力。',
+    strength:'細緻踏實、親和力強、服務精神好、謹慎負責', weakness:'缺乏魄力、過於謹慎、容易優柔寡斷',
+    career:'適合行政、服務業、醫療護理、教育', relationship:'感情體貼細心，是溫柔的伴侶' },
+  '庚': { element:'金', yinYang:'陽', symbol:'鋼刀利劍', tags:['剛強果決','行動力強','義氣當先'],
+    summary:'庚金為陽金，如鋼刀利劍，剛強銳利。個性果決剛強，行動力強，重義氣，有正義感。處事乾脆俐落，不拖泥帶水，但有時過於強硬，不知變通。',
+    strength:'果決勇敢、執行力強、義氣重情、不服輸', weakness:'過於剛硬、不善變通、易與人衝突',
+    career:'適合軍警、外科、金融、法律、運動競技', relationship:'感情直接坦率，忠誠義氣，需學習表達柔情' },
+  '辛': { element:'金', yinYang:'陰', symbol:'珠寶首飾', tags:['精緻優雅','自尊心強','審美出眾'],
+    summary:'辛金為陰金，如珠寶首飾，精緻而有質感。個性優雅細緻，自尊心強，重視品質與美感。有藝術鑑賞力，但有時過於自傲，或在意他人眼光。',
+    strength:'精緻優雅、品味出眾、審美能力強、有質感', weakness:'自尊心過強、過度在意外表與評價',
+    career:'適合藝術、珠寶、美容、設計、外交', relationship:'感情精緻浪漫，重視儀式感，對伴侶有一定要求' },
+  '壬': { element:'水', yinYang:'陽', symbol:'江河大海', tags:['智慧廣博','包容靈動','善謀策略'],
+    summary:'壬水為陽水，如江河大海，廣闊深遠。個性智慧靈動，思維廣博，善於謀略。適應力強，善於察言觀色。有大格局的視野，但有時過於飄忽，缺乏定性。',
+    strength:'智慧廣博、應變能力強、有大局觀、包容性高', weakness:'定性不足、善變、有時過於算計',
+    career:'適合策略規劃、外交、貿易、媒體、顧問', relationship:'感情靈動多變，魅力十足，需培養穩定感' },
+  '癸': { element:'水', yinYang:'陰', symbol:'雨露甘霖', tags:['細膩敏感','直覺準確','溫柔滋潤'],
+    summary:'癸水為陰水，如雨露甘霖，滋潤萬物。個性細膩敏感，直覺準確，善於感受他人情感。內心世界豐富，有藝術與靈性氣質。但有時過於感性，情緒起伏大。',
+    strength:'直覺敏銳、細膩溫柔、藝術感強、同理心強', weakness:'情緒化、過於敏感、容易多愁善感',
+    career:'適合藝術、諮商、醫療、寫作、靈性探索', relationship:'感情深情細膩，善於感受伴侶需求' },
+};
+
+const BAZI_FLOW_ADVICE = {
+  '比肩': { theme:'競爭合作', advice:'今年同行競爭增多，適合發展合作關係，可借同儕力量共同成長，需防因人際而有財務損耗。' },
+  '劫財': { theme:'財運起伏', advice:'今年財運波動明顯，需防因人破財，投資理財宜保守，善用人際關係可化解風險。' },
+  '食神': { theme:'才藝表現', advice:'今年表現機會多，適合展現才華與創意，生活享受豐富，是創業或從事創意工作的好時機。' },
+  '傷官': { theme:'突破創新', advice:'今年有強烈突破欲望，適合改革創新或開展新事業，但需注意與上司長輩的關係。' },
+  '偏財': { theme:'偏財機遇', advice:'今年偏財旺，貴人相助帶來意外機遇，適合業務開拓與投資，需積極把握。' },
+  '正財': { theme:'穩定收入', advice:'今年正財旺，收入穩定增加，適合長期投資與儲蓄，工作踏實可獲相應回報。' },
+  '七殺': { theme:'挑戰壓力', advice:'今年競爭與挑戰增強，壓力較大，但可激發潛能突破，需謹防意外健康與訴訟風險。' },
+  '正官': { theme:'事業升遷', advice:'今年事業運強，升遷機會多，適合求職或爭取晉升，職場表現受到肯定。' },
+  '偏印': { theme:'學習充電', advice:'今年學習運強，適合進修充電、研究探索，貴人暗助，需防過度依賴或懶散。' },
+  '正印': { theme:'學術貴人', advice:'今年得長輩貴人提攜，文書考試順利，適合進修取得資格認證，得官方認可。' },
+};
+
+function getBaziDecadal(monthStem, monthBranch, gender, yearStem, birthYear, birthDay) {
+  const isYangYear = STEM_YY[yearStem] === '陽';
+  const isMale = gender === 'male';
+  const isForward = (isMale && isYangYear) || (!isMale && !isYangYear);
+  const dir = isForward ? 1 : -1;
+
+  // Approximate starting age using distance to nearest solar term (节 ≈ day 6 of each month)
+  const termDay = 6;
+  const days = isForward
+    ? (birthDay < termDay ? termDay - birthDay : 30 - birthDay + termDay)
+    : (birthDay > termDay ? birthDay - termDay : birthDay + 24);
+  const startAge = Math.max(1, Math.round(days / 3));
+
+  const monthIdx = SIXTY.findIndex(gz => gz[0] === monthStem && gz[1] === monthBranch);
+  const currentYear = new Date().getFullYear();
+  const currentAge = currentYear - birthYear;
+
+  return {
+    direction: isForward ? '順行' : '逆行',
+    startAge,
+    limits: Array.from({length: 8}, (_, i) => {
+      const idx = ((monthIdx + dir * (i + 1)) % 60 + 60) % 60;
+      const gz = SIXTY[idx];
+      const ageStart = startAge + i * 10;
+      return {
+        ganzhi: gz,
+        stem: gz[0],
+        branch: gz[1],
+        stemElement: STEM_ELEM[gz[0]],
+        branchElement: BRANCH_ELEM[gz[1]],
+        ageRange: [ageStart, ageStart + 9],
+        isCurrent: currentAge >= ageStart && currentAge <= ageStart + 9,
+      };
+    }),
+  };
+}
+
+app.post('/api/bazi', (req, res) => {
+  const { name, gender, solarDate, timeKey } = req.body;
+  if (!name || !gender || !solarDate || !timeKey) {
+    return res.status(400).json({ error: '請填寫所有欄位' });
+  }
+  const hourNum = HOUR_MAP[timeKey];
+  if (hourNum === undefined) return res.status(400).json({ error: '無效的出生時辰' });
+
+  try {
+    const iztroGender = gender === 'male' ? 'male' : 'female';
+    const chart = astro.astrolabeBySolarDate(solarDate, hourNum, iztroGender, true, 'zh-TW');
+    const cd = chart.rawDates.chineseDate;
+
+    const [yearStem, yearBranch] = cd.yearly;
+    const [monthStem, monthBranch] = cd.monthly;
+    const [dayStem, dayBranch] = cd.daily;
+    const [hourStem, hourBranch] = cd.hourly;
+    const dayMaster = dayStem;
+
+    const pillars = [
+      { label:'年柱', pos:'年', stem:yearStem,  branch:yearBranch  },
+      { label:'月柱', pos:'月', stem:monthStem, branch:monthBranch },
+      { label:'日柱', pos:'日', stem:dayStem,   branch:dayBranch,  isDayMaster:true },
+      { label:'時柱', pos:'時', stem:hourStem,  branch:hourBranch  },
+    ].map(p => ({
+      ...p,
+      stemElement:  STEM_ELEM[p.stem],
+      stemYinYang:  STEM_YY[p.stem],
+      branchElement: BRANCH_ELEM[p.branch],
+      tenGod: p.isDayMaster ? '日主' : getTenGod(dayMaster, p.stem),
+    }));
+
+    const fiveElements = {'木':0,'火':0,'土':0,'金':0,'水':0};
+    for (const p of pillars) {
+      fiveElements[p.stemElement]++;
+      fiveElements[p.branchElement]++;
+    }
+
+    const birthYear = parseInt(solarDate.split('-')[0]);
+    const birthDay  = parseInt(solarDate.split('-')[2]);
+
+    const decadal = getBaziDecadal(monthStem, monthBranch, gender, yearStem, birthYear, birthDay);
+
+    const personality = DAY_MASTER_PERSONALITY[dayMaster] || {
+      element: STEM_ELEM[dayMaster], yinYang: STEM_YY[dayMaster], symbol:'—',
+      tags:[], summary:'日主資料待補充', strength:'', weakness:'', career:'', relationship:'',
+    };
+
+    // 2026 = 丙午年
+    const flowYearStem = '丙', flowYearBranch = '午';
+    const tenGod2026 = getTenGod(dayMaster, flowYearStem);
+    const flowAdvice = BAZI_FLOW_ADVICE[tenGod2026] || { theme:'運勢平穩', advice:'今年運勢平穩，按部就班可有所成就。' };
+
+    res.json({
+      name,
+      gender: gender === 'male' ? '男' : '女',
+      solarDate,
+      timeKey,
+      dayMaster,
+      dayMasterElement: STEM_ELEM[dayMaster],
+      dayMasterYinYang: STEM_YY[dayMaster],
+      dayMasterSymbol: personality.symbol,
+      pillars,
+      fiveElements,
+      decadal,
+      personality,
+      flowYear: {
+        year: 2026,
+        ganzhi: `${flowYearStem}${flowYearBranch}年`,
+        tenGod: tenGod2026,
+        branchElement: BRANCH_ELEM[flowYearBranch],
+        theme: flowAdvice.theme,
+        advice: flowAdvice.advice,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({ error: '八字排盤失敗：' + err.message });
+  }
+});
+
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`紫微斗數排盤伺服器已啟動：http://localhost:${PORT}`);

@@ -205,6 +205,83 @@
     .loading { text-align: center; color: #d4af37; padding: 16px; letter-spacing: 2px; }
     .divider { border: none; border-top: 1px solid rgba(212,175,55,0.15); margin: 24px 0; }
 
+    /* Tab 導航 */
+    .tab-nav {
+      display: flex; gap: 0; margin-bottom: 24px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(212,175,55,0.2); border-radius: 12px; overflow: hidden;
+    }
+    .tab-btn {
+      flex: 1; padding: 14px; background: transparent; border: none;
+      color: #a89cc8; font-size: 1rem; font-weight: bold; letter-spacing: 3px;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .tab-btn:hover { color: #d4af37; background: rgba(212,175,55,0.06); }
+    .tab-btn.active { background: rgba(212,175,55,0.12); color: #d4af37; border-bottom: 2px solid #d4af37; }
+
+    /* 八字四柱 */
+    .bazi-pillars {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 24px;
+    }
+    .bazi-pillar {
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px; padding: 14px 10px; text-align: center;
+    }
+    .bazi-pillar.day-master { border-color: #d4af37; background: rgba(212,175,55,0.1); }
+    .bazi-pillar .bp-pos { font-size: 0.7rem; color: #a89cc8; margin-bottom: 8px; letter-spacing: 2px; }
+    .bazi-pillar .bp-tengod {
+      font-size: 0.72rem; padding: 2px 8px; border-radius: 10px; margin-bottom: 8px;
+      display: inline-block; background: rgba(138,111,200,0.2); border: 1px solid rgba(138,111,200,0.4);
+      color: #c8a8ff;
+    }
+    .bazi-pillar .bp-tengod.dm { background: rgba(212,175,55,0.2); border-color: rgba(212,175,55,0.5); color: #d4af37; }
+    .bazi-pillar .bp-stem {
+      font-size: 2rem; font-weight: bold; margin-bottom: 4px; line-height: 1;
+    }
+    .bazi-pillar .bp-branch { font-size: 1.8rem; font-weight: bold; margin-bottom: 8px; line-height: 1; }
+    .bazi-pillar .bp-elem { font-size: 0.7rem; color: #a89cc8; }
+
+    /* 五行分布 */
+    .five-elem-grid { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
+    .fe-row { display: grid; grid-template-columns: 28px 1fr 24px; align-items: center; gap: 10px; }
+    .fe-label { font-size: 0.85rem; font-weight: bold; text-align: center; }
+    .fe-bar-bg { background: rgba(255,255,255,0.06); border-radius: 6px; height: 18px; overflow: hidden; }
+    .fe-bar { height: 100%; border-radius: 6px; transition: width 0.5s; }
+    .fe-count { font-size: 0.8rem; color: #a89cc8; text-align: right; }
+
+    /* 大運排盤（八字） */
+    .bazi-decadal-header { display: flex; gap: 16px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
+    .bazi-dir-badge {
+      font-size: 0.78rem; padding: 3px 10px; border-radius: 8px;
+      background: rgba(80,160,220,0.15); border: 1px solid rgba(80,160,220,0.4); color: #80c8f8;
+    }
+    .bazi-start-age { font-size: 0.82rem; color: #a89cc8; }
+    .bazi-limits { display: flex; flex-direction: column; gap: 8px; }
+    .bazi-limit-item {
+      display: grid; grid-template-columns: 80px 70px 70px 1fr auto;
+      align-items: center; gap: 10px;
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px; padding: 10px 14px;
+    }
+    .bazi-limit-item.current { border-color: #d4af37; background: rgba(212,175,55,0.08); }
+    .bazi-limit-range { font-size: 0.82rem; color: #a89cc8; }
+    .bazi-limit-gz { font-size: 1.1rem; color: #e8e0f0; font-weight: bold; letter-spacing: 2px; }
+    .bazi-limit-elem { font-size: 0.78rem; color: #c8b8e8; }
+
+    /* 八字流年 */
+    .bazi-flow-box {
+      background: rgba(80,160,220,0.08); border: 1px solid rgba(80,160,220,0.3);
+      border-radius: 14px; padding: 20px 24px;
+    }
+    .bazi-flow-top { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+    .bazi-flow-gz { font-size: 1.3rem; color: #80c8f8; font-weight: bold; letter-spacing: 3px; }
+    .bazi-flow-tg {
+      font-size: 0.8rem; padding: 3px 10px; border-radius: 10px;
+      background: rgba(138,111,200,0.2); border: 1px solid rgba(138,111,200,0.4); color: #c8a8ff;
+    }
+    .bazi-flow-theme { font-size: 0.82rem; color: #f0c040; padding: 2px 8px; background: rgba(240,192,64,0.1); border-radius: 6px; }
+    .bazi-flow-advice { font-size: 0.88rem; color: #c8e4f8; line-height: 1.8; }
+
     /* PDF 列印樣式 */
     @media print {
       body { background: #fff !important; color: #111 !important; padding: 0; }
@@ -217,9 +294,14 @@
 <body>
 <div class="container">
   <header>
-    <h1>紫微斗數命盤</h1>
-    <p>輸入出生資料，即刻排出您的紫微命盤</p>
+    <h1>命盤排盤系統</h1>
+    <p>紫微斗數 × 八字命理，輸入出生資料即刻排盤</p>
   </header>
+
+  <div class="tab-nav">
+    <button class="tab-btn active" id="tabZiwei" onclick="switchTab('ziwei')">紫微斗數</button>
+    <button class="tab-btn" id="tabBazi" onclick="switchTab('bazi')">八字命理</button>
+  </div>
 
   <div class="card">
     <div class="form-grid">
@@ -257,7 +339,7 @@
       </div>
     </div>
     <div class="btn-row">
-      <button class="btn" onclick="calculate()">排　命　盤</button>
+      <button class="btn" id="btnCalc" onclick="calculate()">排　紫微　命盤</button>
       <button class="btn-pdf" id="btnPdf" onclick="exportPDF()">下載 PDF</button>
     </div>
   </div>
@@ -267,10 +349,33 @@
       <div id="result-content"></div>
     </div>
   </div>
+
+  <div id="resultBazi" class="result">
+    <div class="card" id="reportContentBazi">
+      <div id="result-content-bazi"></div>
+    </div>
+  </div>
 </div>
 
 <script>
-async function calculate() {
+let activeTab = 'ziwei';
+
+function switchTab(tab) {
+  activeTab = tab;
+  document.getElementById('tabZiwei').classList.toggle('active', tab === 'ziwei');
+  document.getElementById('tabBazi').classList.toggle('active', tab === 'bazi');
+  document.getElementById('btnCalc').textContent = tab === 'ziwei' ? '排　紫微　命盤' : '排　八字　命盤';
+  document.getElementById('result').style.display = 'none';
+  document.getElementById('resultBazi').style.display = 'none';
+  document.getElementById('btnPdf').classList.remove('visible');
+}
+
+function calculate() {
+  if (activeTab === 'ziwei') calculateZiwei();
+  else calculateBazi();
+}
+
+async function calculateZiwei() {
   const name = document.getElementById('name').value.trim();
   const gender = document.getElementById('gender').value;
   const solarDate = document.getElementById('solarDate').value;
@@ -294,18 +399,51 @@ async function calculate() {
     renderResult(data, contentDiv);
     document.getElementById('btnPdf').classList.add('visible');
     window._chartData = data;
+    window._activeReport = 'ziwei';
+  } catch (e) {
+    contentDiv.innerHTML = '<div class="error-msg">連線失敗，請稍後再試</div>';
+  }
+}
+
+async function calculateBazi() {
+  const name = document.getElementById('name').value.trim();
+  const gender = document.getElementById('gender').value;
+  const solarDate = document.getElementById('solarDate').value;
+  const timeKey = document.getElementById('timeKey').value;
+  if (!name || !solarDate) { alert('請填寫姓名與出生日期'); return; }
+
+  const resultDiv = document.getElementById('resultBazi');
+  const contentDiv = document.getElementById('result-content-bazi');
+  resultDiv.style.display = 'block';
+  contentDiv.innerHTML = '<div class="loading">排盤中⋯⋯</div>';
+  resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  try {
+    const res = await fetch('/api/bazi', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, gender, solarDate, timeKey }),
+    });
+    const data = await res.json();
+    if (data.error) { contentDiv.innerHTML = `<div class="error-msg">${data.error}</div>`; return; }
+    renderBaziResult(data, contentDiv);
+    document.getElementById('btnPdf').classList.add('visible');
+    window._baziData = data;
+    window._activeReport = 'bazi';
   } catch (e) {
     contentDiv.innerHTML = '<div class="error-msg">連線失敗，請稍後再試</div>';
   }
 }
 
 function exportPDF() {
-  const data = window._chartData;
+  const isZiwei = window._activeReport !== 'bazi';
+  const data = isZiwei ? window._chartData : window._baziData;
   if (!data) return;
-  const element = document.getElementById('reportContent');
+  const element = document.getElementById(isZiwei ? 'reportContent' : 'reportContentBazi');
+  const prefix = isZiwei ? '紫微命盤' : '八字命盤';
   const opt = {
     margin: [10, 10],
-    filename: `紫微命盤_${data.name}_${data.solarDate}.pdf`,
+    filename: `${prefix}_${data.name}_${data.solarDate}.pdf`,
     image: { type: 'jpeg', quality: 0.95 },
     html2canvas: { scale: 2, useCORS: true, backgroundColor: '#1a1535' },
     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
@@ -402,6 +540,121 @@ function renderYearly(ya) {
   }).join('');
 
   return overview + `<div class="monthly-grid">${months}</div>`;
+}
+
+const ELEM_COLOR = {'木':'#6db86d','火':'#e07060','土':'#c8a84e','金':'#b8c8e8','水':'#6090d0'};
+
+function renderBaziResult(data, container) {
+  // Four Pillars
+  const pillarsHtml = data.pillars.map(p => {
+    const color = ELEM_COLOR[p.stemElement] || '#e8e0f0';
+    const bColor = ELEM_COLOR[p.branchElement] || '#e8e0f0';
+    return `
+      <div class="bazi-pillar ${p.isDayMaster ? 'day-master' : ''}">
+        <div class="bp-pos">${p.pos}</div>
+        <div class="bp-tengod ${p.isDayMaster ? 'dm' : ''}">${p.tenGod}</div>
+        <div class="bp-stem" style="color:${color}">${p.stem}</div>
+        <div class="bp-branch" style="color:${bColor}">${p.branch}</div>
+        <div class="bp-elem">${p.stemYinYang}${p.stemElement} / ${p.branchElement}</div>
+      </div>`;
+  }).join('');
+
+  // Five Elements bar chart
+  const fe = data.fiveElements;
+  const maxFe = Math.max(...Object.values(fe), 1);
+  const feHtml = ['木','火','土','金','水'].map(e => {
+    const cnt = fe[e] || 0;
+    const pct = Math.round((cnt / maxFe) * 100);
+    const color = ELEM_COLOR[e];
+    return `
+      <div class="fe-row">
+        <div class="fe-label" style="color:${color}">${e}</div>
+        <div class="fe-bar-bg">
+          <div class="fe-bar" style="width:${pct}%;background:${color}"></div>
+        </div>
+        <div class="fe-count">${cnt}</div>
+      </div>`;
+  }).join('');
+
+  // Personality
+  const p = data.personality;
+  const tags = (p.tags||[]).map(t => `<span class="tag">${t}</span>`).join(' ');
+  const personalityHtml = `
+    <div class="personality-card">
+      <div class="personality-header">
+        <span class="personality-title" style="color:${ELEM_COLOR[p.element]||'#c8a8ff'}">${p.symbol}（${p.yinYang}${p.element}）</span>${tags}
+      </div>
+      <div class="personality-summary">${p.summary}</div>
+      <div class="personality-grid">
+        <div class="personality-item"><div class="pi-label">✦ 優勢特質</div><div class="pi-value">${p.strength}</div></div>
+        <div class="personality-item"><div class="pi-label">△ 需注意</div><div class="pi-value">${p.weakness}</div></div>
+        <div class="personality-item"><div class="pi-label">◎ 適合事業</div><div class="pi-value">${p.career}</div></div>
+        <div class="personality-item"><div class="pi-label">♡ 感情特質</div><div class="pi-value">${p.relationship}</div></div>
+      </div>
+    </div>`;
+
+  // Decadal major limits
+  const dec = data.decadal;
+  const decHtml = `
+    <div class="bazi-decadal-header">
+      <span class="bazi-dir-badge">${dec.direction}</span>
+      <span class="bazi-start-age">起運歲數：約 ${dec.startAge} 歲（近似值）</span>
+    </div>
+    <div class="bazi-limits">${dec.limits.map(l => {
+      const sColor = ELEM_COLOR[l.stemElement]||'#e8e0f0';
+      const bColor = ELEM_COLOR[l.branchElement]||'#e8e0f0';
+      const cur = l.isCurrent ? '<span class="current-badge">當前</span>' : '';
+      return `<div class="bazi-limit-item ${l.isCurrent ? 'current' : ''}">
+        <div class="bazi-limit-range">${cur}<br>${l.ageRange[0]}–${l.ageRange[1]} 歲</div>
+        <div class="bazi-limit-gz"><span style="color:${sColor}">${l.stem}</span><span style="color:${bColor}">${l.branch}</span></div>
+        <div class="bazi-limit-elem">${l.stemElement} / ${l.branchElement}</div>
+        <div></div>
+      </div>`;
+    }).join('')}</div>`;
+
+  // Flow year
+  const fy = data.flowYear;
+  const fyHtml = `
+    <div class="bazi-flow-box">
+      <div class="bazi-flow-top">
+        <span class="bazi-flow-gz">${fy.ganzhi}</span>
+        <span class="bazi-flow-tg">對日主：${fy.tenGod}</span>
+        <span class="bazi-flow-theme">${fy.theme}</span>
+      </div>
+      <div class="bazi-flow-advice">${fy.advice}</div>
+    </div>`;
+
+  container.innerHTML = `
+    <div class="result-header">
+      <div class="person-name">${data.name}</div>
+      <div class="meta">${data.gender}命｜${data.solarDate}（${data.timeKey}）</div>
+    </div>
+
+    <div class="highlight-box">
+      <div class="label">日　主</div>
+      <div class="value" style="color:${ELEM_COLOR[data.dayMasterElement]||'#f0c040'}">${data.dayMaster}</div>
+      <div class="sub">${data.dayMasterYinYang}${data.dayMasterElement}｜${data.dayMasterSymbol}</div>
+    </div>
+
+    <hr class="divider">
+    <div class="section-title">四　柱　八　字</div>
+    <div class="bazi-pillars">${pillarsHtml}</div>
+
+    <hr class="divider">
+    <div class="section-title">五行分布</div>
+    <div class="five-elem-grid">${feHtml}</div>
+
+    <hr class="divider">
+    <div class="section-title">日主性格分析</div>
+    ${personalityHtml}
+
+    <hr class="divider">
+    <div class="section-title">大運排盤（每十年一柱）</div>
+    ${decHtml}
+
+    <hr class="divider">
+    <div class="section-title">2026 丙午年流年分析</div>
+    ${fyHtml}`;
 }
 
 function renderResult(data, container) {
